@@ -1,3 +1,17 @@
+/**
+  ******************************************************************************
+  * @file    KalmanIMU.pde
+  * @author  Patrick Jose Pereira
+  * @version V1.0.0
+  * @date    2-January-2015
+  * @brief   This is the main file !
+  *     _____________  /\   ____________
+  *    /\_  _ __ ___ \ \/ / __ _ _ __ / |_
+  *   / /_)/ '__/ _ \ \  / / _` | '_ \| __|
+  *  / ___/| | | (_) \ \/ / (_| | | | | |_
+  *  \/    |_|  \___/ \__/ \__,_|_| |_|\__|
+  ******************************************************************************/
+   
 
 #define GRAVITY 101 //this equivalent to 1G in the raw data coming from the accelerometer 
 #define Accel_Scale(x) x*(GRAVITY/9.81)//Scaling the raw data of the accel to actual acceleration in meters for seconds square
@@ -9,17 +23,17 @@
 #define ToRad(x) (x*PI)/180.0
 #define ToDeg(x) (x*180.0)/PI
 
-#define PRINT_ANALOGS 1 // If 1 will print the analog raw data
+#define PRINT_ANALOGS 0 // If 1 will print the analog raw data
 #define PRINT_KALMAN 1 //Print kalman
-#define PRINT_GPS 1
+#define PRINT_GPS 0    //if you have a GPS connected
 
-#define PROCESS_GPS 1
+#define PROCESS_GPS 0
 
+// I only use the V3 here, so you can have luck with the others versions.
 // *** NOTE!   Hardware version - Can be used for v1 (daughterboards) , v2 (flat) or new v3 (MPU6000)
 #define BOARD_VERSION 3 // 1 For V1 and 2 for V2 and 3 for new V3
 
 #include <SPI.h>
-#include <arduino.h>
 #include "MPU6000.h"
 #include "HMC5883.h"
 #include "MPU60001.h"
