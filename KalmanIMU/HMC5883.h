@@ -18,8 +18,7 @@
 // AVR LibC Includes
 #include <math.h>
 //#include "WConstants.h"
-
-#include <Wire.h>
+#define MAGNETIC_DECLINATION 1
 
 #define COMPASS_ADDRESS      0x1E
 #define ConfigRegA           0x00
@@ -63,6 +62,16 @@
 #define PositiveBiasConfig   0x11
 #define NegativeBiasConfig   0x12
 
+int mag_offset[3];
+int mag_scaleset[3];
+int mag_x;
+int mag_y;
+int mag_z;
+int last_mag_x[2]={};
+int last_mag_y[2]={};
+int last_mag_z[2]={};
+float Heading,Heading_X,Heading_Y;
+
 bool HMC5883_init()
 {
   int success = 0;
@@ -71,9 +80,9 @@ bool HMC5883_init()
   Wire.begin();
   delay(10);
 
-  //mag_offset[0] = 0;
-  //mag_offset[1] = 0;
-  //mag_offset[2] = 0;
+  mag_offset[0] = 0;
+  mag_offset[1] = 0;
+  mag_offset[2] = 0;
 
   Wire.beginTransmission(COMPASS_ADDRESS);
   Wire.write((uint8_t)ConfigRegA);
@@ -99,6 +108,31 @@ void HMC5883_set_offset(int offsetx, int offsety, int offsetz)
   mag_offset[2] = offsetz;
 }
 
+void HMC5883_maxmin()
+{
+  if(mag_x>last_mag_x[1])
+    last_mag_x[1]=mag_x;
+  if(mag_x<last_mag_x[0])
+    last_mag_x[0]=mag_x;
+
+  if(mag_y>last_mag_y[1])
+    last_mag_y[1]=mag_y;
+  if(mag_y<last_mag_y[0])
+    last_mag_y[0]=mag_y;
+
+  if(mag_z>last_mag_z[1])
+    last_mag_z[1]=mag_z;
+  if(mag_z<last_mag_z[0])
+    last_mag_z[0]=mag_z;
+}
+
+void HMC5883_set_scale(int scalesetx, int scalesety, int scalesetz)
+{
+  mag_scaleset[0] = scalesetx;
+  mag_scaleset[1] = scalesety;
+  mag_scaleset[2] = scalesetz;
+}
+
 // Read Sensor data in chip axis
 void HMC5883_read()
 {
@@ -120,9 +154,9 @@ void HMC5883_read()
 
   if (i==6){  // All bytes received?
     // MSB byte first, then LSB
-    mag_x = ((((int)buff[0]) << 8) | buff[1])*SENSOR_SIGN[6] + mag_offset[0];    // X axis
-    mag_y = ((((int)buff[4]) << 8) | buff[5])*SENSOR_SIGN[7] + mag_offset[1];    // Y axis
-    mag_z = ((((int)buff[2]) << 8) | buff[3])*SENSOR_SIGN[8] + mag_offset[2];    // Z axis
+    mag_x = (((((int)buff[0]) << 8) | buff[1])*SENSOR_SIGN[6] + mag_offset[0])*scalesetx;    // X axis
+    mag_y = (((((int)buff[4]) << 8) | buff[5])*SENSOR_SIGN[7] + mag_offset[1])*scalesety;    // Y axis
+    mag_z = (((((int)buff[2]) << 8) | buff[3])*SENSOR_SIGN[8] + mag_offset[2])*scalesetz;    // Z axis
   }
 }
 

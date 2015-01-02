@@ -39,6 +39,8 @@
 #include <SPI.h>
 #include "MPU6000.h"
 #include "MPU60001.h"
+#include "HMC5883.h"
+
 
 #if BOARD_VERSION == 3
 #define SERIAL_MUX_PIN 7
@@ -59,7 +61,7 @@
 #endif
 
 //Sensor: GYROX, GYROY, GYROZ, ACCELX, ACCELY, ACCELZ
-float SENSOR_SIGN[]={-1,-1,-1,-1,1,-1,1,1,1}; //{1,1,-1,1,-1,1}Used to change the polarity of the sensors{-1,1,-1,-1,-1,1}
+float SENSOR_SIGN[]={-1,-1,-1,-1,1,-1}; //{1,1,-1,1,-1,1}Used to change the polarity of the sensors{-1,1,-1,-1,-1,1}
 
 int long timer=0; //general porpuse timer 
 int long timer24=0; //Second timer used to print values 
@@ -110,7 +112,6 @@ volatile int16_t analog_buffer[8];
 
 #include <math.h>
 #include "kalman.h"
-#include "HMC5883.h"
 
 
 KALDATA xkaldata;
@@ -167,9 +168,6 @@ void loop()
     dt = (Now - lastread) * .001; //compute the time delta since last iteration, in sec.
    
     read_adc_raw(); //ADC Stuff
-    HMC5883_read(); //read  mag
-    //for test
-    HMC5883_maxmin();
 
     state_update(Gyro_Scaled(read_adc(1)),&xkaldata, dt);
     state_update(Gyro_Scaled(read_adc(0)),&ykaldata, dt);
